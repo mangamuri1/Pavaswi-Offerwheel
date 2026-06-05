@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Spin Wheel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: linear-gradient(135deg, #FFF8E7 0%, #F5E6D3 100%); /* Premium warm jewellery theme background */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+  }
+  .top-images {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .top-logo {
+    height: 70px;
+    max-width: 180px;
+    object-fit: contain;
+  }
+  .top-owner {
+    height: 120px;
+    width: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #8B0000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+  @media (max-width: 480px) {
+    .top-logo { height: 50px; }
+    .top-owner { height: 65px; width: 65px; border-width: 2px; }
+  }
+  .container { padding: 0 0.8rem 1.2rem; max-width: 420px; margin: 0 auto; text-align: center; }
+  .shop-title { font-size: 12px; color: var(--color-text-secondary); letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 3px; }
+  .main-title { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1.2rem; }
+  .wheel-wrap { position: relative; width: 290px; height: 290px; margin: 0 auto 1.2rem; }
+  .pointer { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); width: 0; height: 0;
+    border-left: 13px solid transparent; border-right: 13px solid transparent;
+    border-top: 30px solid #8B0000; z-index: 10; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)); }
+  .spin-btn { background: #8B0000; color: #fff; border: none; border-radius: 50px;
+    padding: 13px 44px; font-size: 16px; font-weight: 500; cursor: pointer; margin-bottom: 1rem;
+    transition: opacity 0.2s, transform 0.1s; width: 100%; max-width: 260px; }
+  .spin-btn:active { transform: scale(0.97); }
+  .spin-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .result-box { min-height: 68px; background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg);
+    padding: 14px 16px; font-size: 14px; color: var(--color-text-primary);
+    margin: 0 auto 0.8rem; max-width: 300px; line-height: 1.6; }
+  .prize-label { font-weight: 500; font-size: 16px; color: #8B0000; display: block; margin-top: 4px; }
+  .reset-btn { background: transparent; border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md); padding: 8px 24px; font-size: 13px;
+    color: var(--color-text-secondary); cursor: pointer; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 1.2rem; }
+  .legend-item { display: flex; align-items: center; gap: 8px; background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md);
+    padding: 8px 10px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-text { font-size: 12px; color: var(--color-text-primary); font-weight: 400; line-height: 1.3; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-images">
+    <img src="Owner Photo.png" alt="Owner" class="top-owner">
+    <img src="Logo.jpeg" alt="Logo" class="top-logo">
+  </div>
+  <p class="shop-title">Pavaswi Jewellary</p>
+  <p class="main-title">Spin &amp; Win!</p>
+
+  <div class="wheel-wrap">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="290" height="290"></canvas>
+  </div>
+
+  <button class="spin-btn" id="spinBtn" onclick="spinWheel()">🎯 Spin the Wheel</button>
+  <div class="result-box" id="resultBox">Spin the wheel to reveal your special offer!</div>
+  <button class="reset-btn" id="resetBtn" style="display:none" onclick="resetWheel()">↺ &nbsp;Spin Again (New Customer)</button>
+
+  <div class="legend" id="legend"></div>
+</div>
+
+<script>
+const offers = [
+  { label: "₹50",    line2: "OFF",               full: "₹50 Off on this purchase!",                      color: "#1565C0", text: "#fff" },
+  { label: "Better", line2: "Luck",               full: "Better Luck Next Time 😔",                       color: "#757575", text: "#fff" },
+  { label: "₹200",   line2: "Voucher*",           full: "₹200 Voucher* (next purchase)", color: "#8B0000", text: "#fff" },
+  { label: "Free",   line2: "Earrings ₹99",       full: "Free Earrings worth ₹99 — yours today! 🎁",      color: "#6A1E8A", text: "#fff" },
+  { label: "₹100",   line2: "OFF",               full: "₹100 Off on this purchase!",                     color: "#1B6B3A", text: "#fff" },
+  { label: "Better", line2: "Luck",               full: "Better Luck Next Time 😔",                       color: "#757575", text: "#fff" },
+  { label: "₹50",    line2: "OFF",               full: "₹50 Off on this purchase!",                      color: "#1565C0", text: "#fff" },
+  { label: "₹100",   line2: "OFF",               full: "₹100 Off on this purchase!",                     color: "#1B6B3A", text: "#fff" },
+];
+
+const legendItems = [
+  { color: "#1565C0", text: "₹50 Off (today)" },
+  { color: "#1B6B3A", text: "₹100 Off (today)" },
+  { color: "#8B0000", text: "₹200 Voucher* (next purchase)" },
+  { color: "#6A1E8A", text: "Free Earrings ₹99" },
+  { color: "#757575", text: "Better Luck Next Time" },
+];
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const n = offers.length;
+const arc = (2 * Math.PI) / n;
+let angle = 0, spinning = false, spun = false;
+
+function drawWheel(a) {
+  ctx.clearRect(0, 0, 290, 290);
+  const cx = 145, cy = 145, r = 138;
+  for (let i = 0; i < n; i++) {
+    const s = a + i * arc, e = s + arc;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, s, e); ctx.closePath();
+    ctx.fillStyle = offers[i].color; ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2.5; ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(s + arc / 2);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fff";
+    ctx.font = "600 12px sans-serif";
+    ctx.fillText(offers[i].label, r - 10, -3);
+    ctx.font = "400 10px sans-serif";
+    ctx.fillText(offers[i].line2, r - 10, 10);
+    ctx.restore();
+  }
+  // outer ring
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 3; ctx.stroke();
+  // center
+  ctx.beginPath(); ctx.arc(cx, cy, 26, 0, 2*Math.PI);
+  ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.strokeStyle = "#ddd"; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = "#8B0000"; ctx.font = "600 10px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("SPIN", cx, cy + 4);
+}
+
+function spinWheel() {
+  if (spinning || spun) return;
+  spinning = true;
+  document.getElementById("spinBtn").disabled = true;
+  document.getElementById("resultBox").innerHTML = "🌀 Spinning...";
+  const total = (5 + Math.floor(Math.random() * 5)) * 2 * Math.PI + Math.random() * 2 * Math.PI;
+  const dur = 4500, t0 = performance.now(), a0 = angle;
+  function animate(now) {
+    const t = Math.min((now - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - t, 4);
+    angle = a0 + total * ease;
+    drawWheel(angle);
+    if (t < 1) { requestAnimationFrame(animate); }
+    else { spinning = false; spun = true; showResult(); document.getElementById("resetBtn").style.display = "inline-block"; }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showResult() {
+  const norm = ((angle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+  const rel = ((3*Math.PI/2) - norm + 2*Math.PI) % (2*Math.PI);
+  const idx = Math.floor(rel / arc) % n;
+  const p = offers[idx];
+  const isBad = p.label === "Better";
+  const isVoucher = p.line2 === "Voucher*";
+  let html = isBad
+    ? `😔 <span class="prize-label" style="color:#757575">${p.full}</span>`
+    : `🎉 You won!<span class="prize-label">${p.full}</span>`;
+  if (isVoucher) html += `<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;">*Voucher applicable on your next visit. Valid for 30 days.</div>`;
+  document.getElementById("resultBox").innerHTML = html;
+}
+
+function resetWheel() {
+  spun = false;
+  document.getElementById("spinBtn").disabled = false;
+  document.getElementById("resetBtn").style.display = "none";
+  document.getElementById("resultBox").innerHTML = "Spin the wheel to reveal your special offer!";
+}
+
+// Legend
+const lg = document.getElementById("legend");
+legendItems.forEach(item => {
+  lg.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${item.color}"></div><span class="legend-text">${item.text}</span></div>`;
+});
+
+drawWheel(0);
+</script>
+</body>
+</html>
