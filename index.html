@@ -113,14 +113,14 @@
 
 <script>
 const offers = [
-  { label: "₹50",    line2: "OFF",               full: "₹50 Off on this purchase!",                      color: "#1565C0", text: "#fff" },
-  { label: "Better", line2: "Luck",               full: "Better Luck Next Time 😔",                       color: "#757575", text: "#fff" },
+  { label: "₹100",   line2: "OFF",               full: "₹100 Off on this purchase!",                     color: "#1B6B3A", text: "#fff" },
   { label: "₹200",   line2: "Voucher*",           full: "₹200 Voucher* (next purchase)", color: "#8B0000", text: "#fff" },
+  { label: "₹100",   line2: "OFF",               full: "₹100 Off on this purchase!",                     color: "#1B6B3A", text: "#fff" },
   { label: "Free",   line2: "Earrings ₹99",       full: "Free Earrings worth ₹99 — yours today! 🎁",      color: "#6A1E8A", text: "#fff" },
   { label: "₹100",   line2: "OFF",               full: "₹100 Off on this purchase!",                     color: "#1B6B3A", text: "#fff" },
   { label: "Better", line2: "Luck",               full: "Better Luck Next Time 😔",                       color: "#757575", text: "#fff" },
   { label: "₹50",    line2: "OFF",               full: "₹50 Off on this purchase!",                      color: "#1565C0", text: "#fff" },
-  { label: "₹100",   line2: "OFF",               full: "₹100 Off on this purchase!",                     color: "#1B6B3A", text: "#fff" },
+  { label: "₹200",   line2: "Voucher*",           full: "₹200 Voucher* (next purchase)", color: "#8B0000", text: "#fff" },
 ];
 
 const legendItems = [
@@ -262,6 +262,27 @@ function showResult() {
   const isVoucher = p.line2 === "Voucher*";
   
   if (isBad) { playLose(); } else { playWin(); }
+
+  // Speak out the result
+  if ('speechSynthesis' in window) {
+    let textToSpeak = "";
+    if (isBad) {
+      textToSpeak = "Better luck next time.";
+    } else if (isVoucher) {
+      textToSpeak = "Congratulations! You won a 200 rupee voucher for your next purchase.";
+    } else if (p.label === "Free") {
+      textToSpeak = "Congratulations! You won free earrings.";
+    } else if (p.line2 === "OFF") {
+      textToSpeak = `Congratulations! You won ${p.label.replace('₹', '')} rupees off on this purchase.`;
+    }
+    
+    // Stop any current speech before starting new one
+    window.speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(textToSpeak);
+    msg.lang = 'en-IN';
+    msg.rate = 1.0;
+    window.speechSynthesis.speak(msg);
+  }
 
   let html = isBad
     ? `😔 <span class="prize-label" style="color:#757575">${p.full}</span>`
