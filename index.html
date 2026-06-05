@@ -81,6 +81,18 @@
     50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
     100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
   }
+  .wa-btn {
+    display: inline-block;
+    background: #25D366;
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 12px;
+    box-shadow: 0 4px 6px rgba(37, 211, 102, 0.3);
+  }
   .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 1.2rem; }
   .legend-item { display: flex; align-items: center; gap: 8px; background: var(--color-background-secondary);
     border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md);
@@ -288,6 +300,12 @@ function showResult() {
     ? `😔 <span class="prize-label" style="color:#757575">${p.full}</span>`
     : `🎉 You won!<span class="prize-label">${p.full}</span>`;
   if (isVoucher) html += `<div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;">*Voucher applicable on your next visit. Valid for 30 days.</div>`;
+  
+  if (!isBad) {
+    const waText = encodeURIComponent(`Hi Pavaswi Jewellary! I just spun the wheel and won: ${p.label} ${p.line2}. How can I claim this?`);
+    html += `<a href="https://wa.me/910000000000?text=${waText}" target="_blank" class="wa-btn">📲 Claim via WhatsApp</a>`;
+  }
+
   document.getElementById("resultBox").innerHTML = html;
 }
 
