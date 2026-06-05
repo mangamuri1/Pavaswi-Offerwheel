@@ -279,20 +279,20 @@ function showResult() {
   if ('speechSynthesis' in window) {
     let textToSpeak = "";
     if (isBad) {
-      textToSpeak = "Better luck next time.";
+      textToSpeak = "మరల ప్రయత్నించండి.";
     } else if (isVoucher) {
-      textToSpeak = "Congratulations! You won a 200 rupee voucher for your next purchase.";
+      textToSpeak = "అభినందనలు! మీరు మీ తదుపరి కొనుగోలుకు 200 రూపాయల వోచర్ గెలుచుకున్నారు.";
     } else if (p.label === "Free") {
-      textToSpeak = "Congratulations! You won free earrings.";
+      textToSpeak = "అభినందనలు! మీరు ఉచిత కమ్మలు గెలుచుకున్నారు.";
     } else if (p.line2 === "OFF") {
-      textToSpeak = `Congratulations! You won ${p.label.replace('₹', '')} rupees off on this purchase.`;
+      textToSpeak = `అభినందనలు! మీరు ఈ కొనుగోలుపై ${p.label.replace('₹', '')} రూపాయల తగ్గింపు గెలుచుకున్నారు.`;
     }
     
     // Stop any current speech before starting new one
     window.speechSynthesis.cancel();
     const msg = new SpeechSynthesisUtterance(textToSpeak);
-    msg.lang = 'en-IN';
-    msg.rate = 1.0;
+    msg.lang = 'te-IN';
+    msg.rate = 0.9;
     window.speechSynthesis.speak(msg);
   }
 
@@ -303,7 +303,7 @@ function showResult() {
   
   if (!isBad) {
     const waText = encodeURIComponent(`Hi Pavaswi Jewellary! I just spun the wheel and won: ${p.label} ${p.line2}. How can I claim this?`);
-    html += `<a href="https://wa.me/910000000000?text=${waText}" target="_blank" class="wa-btn">📲 Claim via WhatsApp</a>`;
+    html += `<a href="https://wa.me/916303683881?text=${waText}" target="_blank" class="wa-btn">📲 Claim via WhatsApp</a>`;
   }
 
   document.getElementById("resultBox").innerHTML = html;
